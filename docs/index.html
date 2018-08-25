@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>2048</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        .shadiaobox{
+            width:90px;
+            height: 90px;
+            margin: 5px;
+            float: left;
+            text-align: center;
+            line-height: 90px;
+            background-color: #e6e6e6;
+            font-size: 32px;
+            font-family: 'Times New Roman', Times, serif;
+        }
+        .shadiaomain{
+            width:400px;height:400px;
+            margin:0 auto;
+            background-color: #c7c7c7;
+        }
+        .shadiaobanner{
+            width: 400px;
+            margin:0 auto;
+        }
+        .shadiaocounter{
+            width:400px;
+            margin:0 auto;
+        }
+        .p{
+            width: 400px;
+            text-align: center;
+            margin:0 auto;
+        }
+    </style>
+</head>
+<body>
+    <div id="banner" class="shadiaobanner">
+        <p>沙雕2048</p>
+        <p>使用方向键"←"，"↑"，"→"，"↓"进行游戏</p>
+    </div>
+    <div id = "main" class="shadiaomain">
+        <div id="s11" class="shadiaobox"></div>
+        <div id="s12" class="shadiaobox"></div>
+        <div id="s13" class="shadiaobox"></div>
+        <div id="s14" class="shadiaobox"></div>
+        <div id="s21" class="shadiaobox"></div>
+        <div id="s22" class="shadiaobox"></div>
+        <div id="s23" class="shadiaobox"></div>
+        <div id="s24" class="shadiaobox"></div>
+        <div id="s31" class="shadiaobox"></div>
+        <div id="s32" class="shadiaobox"></div>
+        <div id="s33" class="shadiaobox"></div>
+        <div id="s34" class="shadiaobox"></div>
+        <div id="s41" class="shadiaobox"></div>
+        <div id="s42" class="shadiaobox"></div>
+        <div id="s43" class="shadiaobox"></div>
+        <div id="s44" class="shadiaobox"></div>
+    </div>
+    <div id="counter" class="shadiaocounter">
+        <p>分数：</p>
+        <span id="score"></span>
+    </div>
+    <script>
+        //棋盘，可用棋盘，总分
+        let qipan = document.getElementById("main").children;
+        let qipan_avail=[]
+        let score = 0;
+        let counter = document.getElementById("score");
+
+        //刷新分数
+        function update_score(){
+            counter.innerText = score;
+        }
+
+        //检查棋盘，压入空位置，用以随机产生2
+        function check(){
+            for(let i=0;i< qipan.length;i++){
+                if(qipan[i].innerHTML === ""){//注意判断条件
+                    qipan_avail.push(qipan[i]);
+                }
+            }
+        }
+        
+        //随机生成一个2
+        function random2(){
+            if(qipan_avail.length>0){
+                let rand2 = Math.floor(Math.random()*qipan_avail.length);
+                let rand2or4 = Math.random()>0.85?4:2;
+                qipan_avail[rand2].innerHTML = rand2or4;//写错成qipan[rand2]，导致前8个格子循环
+                qipan_avail=[];
+            }else{
+                // if(tra_full()===1){
+                //     console.log("go on!!");
+                // }
+                if(tra_full()===0){
+                    endgame();
+                }
+            }
+        }
+        
+
+        //相邻相加
+        function add_neighbor(flags_arr){
+            let flags = flags_arr;
+            for(let k =0;k<4;k++){
+                if(k-1<0){
+                    continue;
+                }
+                if(k>=flags.length)
+                        break;
+                if(flags[k-1]===flags[k]){
+                    flags[k-1]+=flags[k];
+                    score+=flags[k-1];
+                    flags.splice(k,1);
+                    }
+            }
+            return flags;
+        }
+
+        //满盘遍历
+        function tra_full(){
+            let flags = [];
+            for(let i=0;i<4;i++){//列方向遍历
+                for(let j=i;j<i+12;j+=4){
+                    if(qipan[j].innerHTML!=""){
+                            flags.push(parseInt(qipan[j].innerHTML));
+                        }
+                }
+                for(let k=0;k<flags.length;k++){
+                    if(k-1<0){
+                        continue;
+                    }
+                    if(flags[k-1]===flags[k]){
+                        return 1;
+                    }
+                }
+                flags=[];
+            }
+            for(let i = 0; i <13;i+=4){//横向
+                for(let j=i;j<i+4;j++){
+                    if(qipan[j].innerHTML!=""){
+                            flags.push(parseInt(qipan[j].innerHTML));
+                        }
+                }
+                for(let k=0;k<flags.length;k++){
+                    if(k-1<0){
+                        continue;
+                    }
+                    if(flags[k-1]===flags[k]){
+                        return 1;
+                    }
+                }
+                flags=[];
+            }
+            return 0;
+        }
+
+        //游戏结束
+        function endgame(){
+            alert('游戏结束！'+"总分： "+score+'\n点击确定重新开始.');
+            location.reload()
+        }
+
+
+        //开始，随机一个2
+        check();
+        random2();
+        update_score();
+
+        document.onkeydown = function(event){
+            var e = event || window.event || arguments.callee.caller.arguments[0];
+            if(e && e.keyCode == 38){//按上键
+                let flags = [];
+                //四列
+                for(let i = 0 ; i<4;i++){
+                    //单独每列遍历,压入数组备用
+                    for(let j=i;j<i+13;j+=4){
+                        if(qipan[j].innerHTML!=""){
+                            flags.push(parseInt(qipan[j].innerHTML));
+                            qipan[j].innerHTML="";//压入就清空
+                        }
+                    }
+                    //相邻相加
+                    flags=add_neighbor(flags);
+                    //写回棋盘
+                    for(let l =i;l<=i+4*(flags.length-1);l+=4){
+                        qipan[l].innerHTML = flags[Math.floor(l/4)];
+                    }
+                    //清空flags为下一列遍历做准备
+                    flags=[];
+                }
+                check();
+                random2();
+                update_score();
+            }
+
+
+            if(e && e.keyCode == 37){//向左
+                let flags = [];
+                //四列
+                for(let i = 0 ; i<13;i+=4){
+                    //单独每列遍历,压入数组备用
+                    for(let j=i;j<i+4;j++){
+                        if(qipan[j].innerHTML!=""){
+                            flags.push(parseInt(qipan[j].innerHTML));
+                            qipan[j].innerHTML="";//压入就清空
+                        }
+                    }
+                    //相邻相加
+                    flags=add_neighbor(flags);
+                    //写回棋盘
+                    for(let l =i;l<i+flags.length;l++){
+                        qipan[l].innerHTML = flags[l%4];//各个方向l的值会改变
+                    }
+                    //清空flags为下一列遍历做准备
+                    flags=[];
+                }
+                check();
+                random2();
+                update_score();
+            }
+
+
+            if(e && e.keyCode == 40){//向下
+                let flags = [];
+                //四列
+                for(let i = 12 ; i<16;i++){
+                    //单独每列遍历,压入数组备用
+                    for(let j=i;j>i-13;j-=4){
+                        if(qipan[j].innerHTML!=""){
+                            flags.push(parseInt(qipan[j].innerHTML));
+                            qipan[j].innerHTML="";//压入就清空
+                        }
+                    }
+                    //相邻相加
+                    flags=add_neighbor(flags);
+                    //写回棋盘
+                    for(let l =i;l>=i-4*(flags.length-1);l-=4){
+                        qipan[l].innerHTML = flags[Math.abs(Math.floor((l-12)/4))];
+                    }
+                    //清空flags为下一列遍历做准备
+                    flags.length=0;
+                }
+                check();
+                random2();
+                update_score();
+            }
+
+            if(e && e.keyCode == 39){//向右
+                let flags = [];
+                //四列
+                for(let i = 3 ; i<16;i+=4){
+                    //单独每列遍历,压入数组备用
+                    for(let j=i;j>i-4;j--){
+                        if(qipan[j].innerHTML!=""){
+                            flags.push(parseInt(qipan[j].innerHTML));
+                            qipan[j].innerHTML="";//压入就清空
+                        }
+                    }
+                    //相邻相加
+                    flags=add_neighbor(flags);
+                    //写回棋盘
+                    for(let l =i;l>i-flags.length;l--){
+                        qipan[l].innerHTML = flags[Math.abs(l%4-3)];//各个方向l的值会改变
+                    }
+                    //清空flags为下一列遍历做准备
+                    flags=[];
+                }
+                check();
+                random2();
+                update_score();
+            }
+        }
+    </script>
+</body>
+</html>
