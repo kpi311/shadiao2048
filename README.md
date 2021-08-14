@@ -7,3 +7,5 @@
 
 
 https://kpi311.github.io/shadiao2048/ 👈点击在线开玩
+
+https://kpi311.github.io/shadiao2048/2021remake 👈点击在线开玩2021年低清重制版
